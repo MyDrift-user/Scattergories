@@ -1,0 +1,61 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scattergories Game</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>Scattergories</h1>
+        <p class="subtitle">Join or Create a Fun Multiplayer Lobby Game</p>
+    </header>
+
+    <!-- Main Menu Section -->
+    <div id="mainMenu" class="container">
+        <div class="card">
+            <h2>Create a Lobby</h2>
+            <button id="createLobbyBtn" class="btn">Create Lobby</button>
+        </div>
+
+        <div class="card">
+            <h2>Join a Lobby</h2>
+            <div class="input-group">
+                <input type="text" id="lobbyIdField" placeholder="Enter Lobby ID" autocomplete="off" autocorrect="off" spellcheck="false">
+                <button id="joinLobbyBtn" class="btn">Join</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- playertag Entry for both creator and direct link joins -->
+    <div id="enterplayertag" class="container" style="display:none;">
+        <div class="card">
+            <h2>Enter Your Player Tag</h2>
+            <input type="text" id="playertagInput" name="playerName" placeholder="Enter your Player Tag" autocomplete="off" autocorrect="off" spellcheck="false" inputmode="text">
+            <button id="submitplayertagBtn" class="btn">Join Lobby</button>
+        </div>
+    </div>
+
+    <!-- Lobby Section (Hidden Initially) -->
+    <div id="lobby" class="container" style="display:none;">
+        <div class="card">
+            <h2>Lobby ID:</h2>
+            <span id="lobbyIdDisplay"></span>
+            <button id="copyLobbyIdBtn" class="btn secondary">Copy ID</button>
+            <button id="copyLobbyLinkBtn" class="btn secondary">Copy Link</button>
+            <h3>Players:</h3>
+            <ul id="playerList" class="player-list"></ul> <!-- Display the list of players -->
+            <div class="btn-group">
+                <button id="startGameBtn" class="btn">Start Game</button>
+                <button id="leaveLobbyBtn" class="btn secondary">Leave Lobby</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
