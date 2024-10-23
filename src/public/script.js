@@ -113,6 +113,8 @@ socket.on('updateLobby', (players) => {
     const playerList = document.getElementById('playerList');
     playerList.innerHTML = '';
     const sessionId = getSessionId();
+    let isHost = false;
+
     players.forEach(player => {
         const li = document.createElement('li');
         if (player.sessionId === sessionId) {
@@ -142,11 +144,23 @@ socket.on('updateLobby', (players) => {
         } else {
             li.textContent = player.playertag;
         }
+        
         if (player.isHost) {
             li.classList.add('host');
+            if (player.sessionId === sessionId) {
+                isHost = true;
+            }
         }
         playerList.appendChild(li);
     });
+
+    // Show the "Start Game" button only if the current user is the host
+    const startGameBtn = document.getElementById('startGameBtn');
+    if (isHost) {
+        startGameBtn.style.display = 'block';
+    } else {
+        startGameBtn.style.display = 'none';
+    }
 });
 
 socket.on('errorMessage', (message) => {
