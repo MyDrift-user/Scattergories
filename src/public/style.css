@@ -66,8 +66,7 @@ input[type="text"] {
     font-size: 1rem;
     outline: none;
     transition: border 0.3s ease;
-    /* Fix the box-sizing to ensure it fits in the container */
-    box-sizing: border-box;
+    box-sizing: border-box; /* Fix box-sizing to ensure proper container fit */
 }
 
 input[type="text"]:focus {
@@ -117,6 +116,52 @@ input[type="text"]:focus {
     margin-bottom: 8px;
     font-weight: 600;
     color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Center the text and button horizontally */
+    position: relative;
+}
+
+.player-list li span {
+    text-align: center;  /* Center non-editable usernames */
+    width: 100%;
+}
+
+/* Center the input field for the current user */
+.player-list input[type="text"] {
+    padding: 0;
+    margin: 0;
+    border: none;
+    background: none;
+    outline: none;
+    font-size: 1rem;
+    color: inherit;
+    font-weight: bold;
+    text-align: center;  /* Center text inside input */
+    width: 100%;  /* Take up full width */
+    font-family: inherit;
+    display: inline;
+}
+
+.player-list input[type="text"]:disabled {
+    cursor: default;
+}
+
+/* Keep the button on the right side of the input */
+.player-list button {
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    position: absolute;
+    right: 10px;  /* Position the button to the right of the list item */
+}
+
+.player-list button:hover {
+    background-color: #0056b3;
 }
 
 @media (max-width: 768px) {
@@ -134,30 +179,8 @@ input[type="text"]:focus {
     }
 }
 
+/* Styling for the host's name */
 .host {
-    color: gold !important;  /* Ensure the color applies */
+    color: gold !important;  /* Make the host name gold */
     font-weight: bold;
-}
-
-/* Additional styles for the name input and edit button */
-.player-list input[type="text"] {
-    padding: 5px;
-    margin-right: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
-}
-
-.player-list button {
-    padding: 5px 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9rem;
-}
-
-.player-list button:hover {
-    background-color: #0056b3;
 }
