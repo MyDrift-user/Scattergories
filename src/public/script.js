@@ -82,8 +82,12 @@ function switchToMainMenu() {
 
 // Create a new lobby
 document.getElementById('createLobbyBtn').addEventListener('click', () => {
-    console.log("Creating lobby...");
-    socket.emit('createLobby');
+    const playertag = getSavedplayertag() || prompt("Enter your player tag to create a lobby:");
+    if (playertag) {
+        const sessionId = saveSession(playertag);  // Save session ID and playertag
+        console.log(`Creating lobby with playertag: ${playertag}, session: ${sessionId}`);
+        socket.emit('createLobby', { playertag, sessionId });
+    }
 });
 
 // Join an existing lobby from the homepage form
@@ -132,12 +136,18 @@ socket.on('rejoinLobby', (lobbyId) => {
 // Update player list when receiving the 'updateLobby' event
 socket.on('updateLobby', (players) => {
     const playerList = document.getElementById('playerList');
-    playerList.innerHTML = '';  // Clear the current list
+    playerList.innerHTML = '';  // Clear the player list
 
     players.forEach(player => {
         const li = document.createElement('li');
-        li.textContent = player.playertag;
-        playerList.appendChild(li);
+        li.textContent = player.playertag;  // Just the player's name, no extra text
+
+        // Apply the host class to the host's username
+        if (player.isHost) {
+            li.classList.add('host');
+        }
+
+        playerList.appendChild(li);  // Add player to the list
     });
 
     console.log('Updated player list:', players);

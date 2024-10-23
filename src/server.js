@@ -18,12 +18,17 @@ io.on('connection', (socket) => {
     console.log(`New user connected: ${socket.id}`);
 
     // Handle creating a lobby
-    socket.on('createLobby', () => {
+    socket.on('createLobby', ({ playertag, sessionId }) => {
         const lobbyId = uuidv4();  // Generate unique lobby ID
-        lobbies[lobbyId] = [];  // Initialize the lobby with an empty array of players
+        lobbies[lobbyId] = [{ sessionId, playertag, isHost: true }];  // Add the creator as host with `isHost: true`
 
-        console.log(`Lobby created: ${lobbyId}`);
+        console.log(`Lobby created: ${lobbyId} by ${playertag}`);
+        userSessions[sessionId] = { lobbyId, playertag, isHost: true };  // Store session
+        socket.join(lobbyId);  // Host joins the lobby
         socket.emit('lobbyCreated', lobbyId);  // Send the lobby ID back to the creator
+
+        // Notify the lobby (currently just the host)
+        io.to(lobbyId).emit('updateLobby', lobbies[lobbyId]);
     });
 
     // Handle joining an existing lobby

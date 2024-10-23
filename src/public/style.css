@@ -133,3 +133,8 @@ input[type="text"]:focus {
         flex-direction: column;
     }
 }
+
+.host {
+    color: gold !important;  /* Ensure the color applies */
+    font-weight: bold;
+}
