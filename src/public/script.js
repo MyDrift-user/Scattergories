@@ -228,6 +228,7 @@ document.getElementById('submitCategoryBtn').addEventListener('click', () => {
             category
         });
         document.getElementById('enterCategory').style.display = 'none';
+        document.getElementById('loadingIndicator').style.display = 'block';
         // Optionally, show a waiting message
     } else {
         alert('Please enter a category.');
@@ -238,6 +239,7 @@ document.getElementById('submitCategoryBtn').addEventListener('click', () => {
 socket.on('startAnswerPhase', ({ categories, letter }) => {
     // Hide other sections and show the answers input
     document.getElementById('enterCategory').style.display = 'none';
+    document.getElementById('loadingIndicator').style.display = 'none';
     document.getElementById('answerPhase').style.display = 'block';
     document.getElementById('randomLetterDisplay').textContent = letter;
 
@@ -296,6 +298,7 @@ document.getElementById('submitAnswersBtn').addEventListener('click', () => {
             answers
         });
         document.getElementById('answerPhase').style.display = 'none';
+        document.getElementById('loadingIndicator').style.display = 'block';
         // Optionally, show a waiting message
     }
 });
@@ -303,6 +306,7 @@ document.getElementById('submitAnswersBtn').addEventListener('click', () => {
 // When showing results
 socket.on('showResults', ({ answers, categories, players, scores, letter }) => {
     // Hide other sections and show the results
+    document.getElementById('loadingIndicator').style.display = 'none';
     document.getElementById('answerPhase').style.display = 'none';
     document.getElementById('resultsPhase').style.display = 'block';
 
