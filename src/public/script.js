@@ -213,10 +213,17 @@ document.getElementById('startGameBtn').addEventListener('click', () => {
     socket.emit('startGame', { lobbyId: currentLobbyId });
 });
 
-socket.on('enterCategories', () => {
+socket.on('enterCategories', ({ duration, startTime }) => {
     // Hide other sections and show the category input
     document.getElementById('lobby').style.display = 'none';
     document.getElementById('enterCategory').style.display = 'block';
+
+    // Display the timer
+    startTimer('categoryTimer', duration, startTime, () => {
+        // Timer ended, disable input or handle accordingly
+        document.getElementById('categoryInput').disabled = true;
+        document.getElementById('submitCategoryBtn').disabled = true;
+    });
 });
 
 document.getElementById('submitCategoryBtn').addEventListener('click', () => {
@@ -235,8 +242,34 @@ document.getElementById('submitCategoryBtn').addEventListener('click', () => {
     }
 });
 
+// Function to start and display the timer
+function startTimer(elementId, duration, startTime, callback) {
+    const timerElement = document.getElementById(elementId);
+    if (!timerElement) return;
+
+    const endTime = startTime + duration * 1000;
+
+    function updateTimer() {
+        const remainingTime = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
+        timerElement.textContent = formatTime(remainingTime);
+        if (remainingTime <= 0) {
+            clearInterval(timerInterval);
+            if (callback) callback();
+        }
+    }
+
+    updateTimer(); // Initial call
+    const timerInterval = setInterval(updateTimer, 1000);
+}
+
+function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+}
+
 // Handle the start of the answer phase
-socket.on('startAnswerPhase', ({ categories, letter }) => {
+socket.on('startAnswerPhase', ({ categories, letter, duration, startTime }) => {
     // Hide other sections and show the answers input
     document.getElementById('enterCategory').style.display = 'none';
     document.getElementById('loadingIndicator').style.display = 'none';
@@ -269,6 +302,14 @@ socket.on('startAnswerPhase', ({ categories, letter }) => {
                 validationMessage.textContent = '';
             }
         });
+    });
+
+    // Start the timer
+    startTimer('answerTimer', duration, startTime, () => {
+        // Timer ended, disable inputs or handle accordingly
+        document.getElementById('submitAnswersBtn').disabled = true;
+        // Optionally, auto-submit the current answers
+        autoSubmitAnswers();
     });
 });
 
@@ -303,8 +344,27 @@ document.getElementById('submitAnswersBtn').addEventListener('click', () => {
     }
 });
 
+function autoSubmitAnswers() {
+    const formData = new FormData(document.getElementById('answersForm'));
+    const answers = {};
+
+    formData.forEach((value, key) => {
+        const input = document.querySelector(`input[name="${key}"]`);
+        answers[key] = value.trim();
+    });
+
+    socket.emit('submitAnswers', {
+        lobbyId: currentLobbyId,
+        sessionId: getSessionId(),
+        answers
+    });
+
+    document.getElementById('answerPhase').style.display = 'none';
+    document.getElementById('loadingIndicator').style.display = 'block';
+}
+
 // When showing results
-socket.on('showResults', ({ answers, categories, players, scores, letter }) => {
+socket.on('showResults', ({ answers, categories, players, scores }) => {
     // Hide other sections and show the results
     document.getElementById('loadingIndicator').style.display = 'none';
     document.getElementById('answerPhase').style.display = 'none';

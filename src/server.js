@@ -86,7 +86,25 @@ io.on('connection', (socket) => {
     socket.on('startGame', ({ lobbyId }) => {
         if (lobbies[lobbyId]) {
             lobbies[lobbyId].gameState = 'collectingCategories';
-            io.to(lobbyId).emit('enterCategories');
+
+            const duration = 30; // seconds for category submission
+            lobbies[lobbyId].timer = {
+                phase: 'collectingCategories',
+                duration: duration,
+                startTime: Date.now()
+            };
+
+            // Set a timeout to end the phase after duration
+            lobbies[lobbyId].phaseTimeout = setTimeout(() => {
+                // Proceed to the next phase when time is up
+                console.log(`Category submission time ended in lobby: ${lobbyId}`);
+                proceedToCollectingAnswers(lobbyId);
+            }, duration * 1000);
+
+            io.to(lobbyId).emit('enterCategories', {
+                duration: duration,
+                startTime: lobbies[lobbyId].timer.startTime
+            });
             console.log(`Game started in lobby: ${lobbyId}`);
         }
     });
@@ -98,18 +116,13 @@ io.on('connection', (socket) => {
 
             // Check if all players have submitted categories
             if (lobbies[lobbyId].categories.length === lobbies[lobbyId].players.length) {
-                lobbies[lobbyId].gameState = 'collectingAnswers';
+                // Clear the timeout as all categories are received
+                if (lobbies[lobbyId].phaseTimeout) {
+                    clearTimeout(lobbies[lobbyId].phaseTimeout);
+                    delete lobbies[lobbyId].phaseTimeout;
+                }
 
-                // Generate a random letter
-                const randomLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-                lobbies[lobbyId].letter = randomLetter;
-
-                // Notify players to enter their answers
-                io.to(lobbyId).emit('startAnswerPhase', {
-                    categories: lobbies[lobbyId].categories.map(c => c.category),
-                    letter: randomLetter
-                });
-                console.log(`All categories received. Starting answer phase with letter: ${randomLetter}`);
+                proceedToCollectingAnswers(lobbyId);
             }
         }
     });
@@ -121,19 +134,13 @@ io.on('connection', (socket) => {
 
             // Check if all players have submitted answers
             if (Object.keys(lobbies[lobbyId].answers).length === lobbies[lobbyId].players.length) {
-                lobbies[lobbyId].gameState = 'reviewing';
+                // Clear the timeout as all answers are received
+                if (lobbies[lobbyId].phaseTimeout) {
+                    clearTimeout(lobbies[lobbyId].phaseTimeout);
+                    delete lobbies[lobbyId].phaseTimeout;
+                }
 
-                // Calculate scores (optional)
-                const scores = calculateScores(lobbies[lobbyId]);
-
-                // Send results to players
-                io.to(lobbyId).emit('showResults', {
-                    answers: lobbies[lobbyId].answers,
-                    categories: lobbies[lobbyId].categories,
-                    players: lobbies[lobbyId].players,
-                    scores
-                });
-                console.log(`All answers received. Showing results.`);
+                proceedToReviewing(lobbyId);
             }
         }
     });
@@ -157,6 +164,61 @@ io.on('connection', (socket) => {
         // Handle player disconnection if necessary
     });
 });
+
+// Function to proceed to collecting answers
+function proceedToCollectingAnswers(lobbyId) {
+    lobbies[lobbyId].gameState = 'collectingAnswers';
+
+    // Generate a random letter
+    const randomLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+    lobbies[lobbyId].letter = randomLetter;
+
+    // Set the timer duration based on the number of categories
+    const numCategories = lobbies[lobbyId].categories.length;
+    const durationPerCategory = 30; // seconds per category
+    const duration = numCategories * durationPerCategory;
+
+    lobbies[lobbyId].timer = {
+        phase: 'collectingAnswers',
+        duration: duration,
+        startTime: Date.now()
+    };
+
+    // Set a timeout to end the phase after duration
+    lobbies[lobbyId].phaseTimeout = setTimeout(() => {
+        // Proceed to reviewing phase when time is up
+        console.log(`Answer submission time ended in lobby: ${lobbyId}`);
+        proceedToReviewing(lobbyId);
+    }, duration * 1000);
+
+    // Notify players to enter their answers, include duration and startTime
+    io.to(lobbyId).emit('startAnswerPhase', {
+        categories: lobbies[lobbyId].categories.map(c => c.category),
+        letter: randomLetter,
+        duration: duration,
+        startTime: lobbies[lobbyId].timer.startTime
+    });
+    console.log(`Starting answer phase with letter: ${randomLetter}`);
+}
+
+// Function to proceed to reviewing phase
+function proceedToReviewing(lobbyId) {
+    lobbies[lobbyId].gameState = 'reviewing';
+
+    // Calculate scores
+    const scores = calculateScores(lobbies[lobbyId]);
+
+    // Send results to players
+    io.to(lobbyId).emit('showResults', {
+        answers: lobbies[lobbyId].answers,
+        categories: lobbies[lobbyId].categories,
+        players: lobbies[lobbyId].players,
+        scores
+    });
+    console.log(`Proceeding to reviewing phase in lobby: ${lobbyId}`);
+
+    // Optionally, set a timer to automatically go back to lobby after some time
+}
 
 // Function to calculate scores with letter validation
 function calculateScores(lobby) {
