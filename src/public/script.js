@@ -70,7 +70,7 @@ function switchToMainMenu() {
 }
 
 document.getElementById('createLobbyBtn').addEventListener('click', () => {
-    const playertag = getSavedplayertag() || prompt("Enter your player tag to create a lobby:");
+    const playertag = getSavedplayertag()
     if (playertag) {
         const sessionId = saveSession(playertag);
         console.log(`Creating lobby with playertag: ${playertag}, session: ${sessionId}`);

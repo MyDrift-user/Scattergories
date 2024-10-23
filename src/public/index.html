@@ -1,6 +1,7 @@
 <!-- public/index.html -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,12 +9,14 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <header>
         <h1>Scattergories</h1>
         <p class="subtitle">Join or Create a Fun Multiplayer Lobby Game</p>
-        <div id="loadingIndicator" class="spinner-border" role="status" style="display:none;">
-            <span class="sr-only">Loading...</span>
+        <div id="loadingIndicator" class="loading-wrapper" role="status" style="display:none;">
+            <div class="spinner-border"></div>
+            <span class="loading-text">Waiting for others</span>
         </div>
     </header>
 
@@ -46,7 +49,9 @@
     <div id="lobby" class="container" style="display:none;">
         <div class="card">
             <h2>Lobby ID:</h2>
-            <span id="lobbyIdDisplay"></span>
+            <div>
+                <span id="lobbyIdDisplay"></span>
+            </div>
             <button id="copyLobbyIdBtn" class="btn secondary">Copy ID</button>
             <button id="copyLobbyLinkBtn" class="btn secondary">Copy Link</button>
             <h3>Players:</h3>
@@ -93,4 +98,5 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="script.js"></script>
 </body>
+
 </html>

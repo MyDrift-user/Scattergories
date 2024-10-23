@@ -231,6 +231,23 @@ label {
     font-weight: bold;
 }
 
+.loading-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin-top: 20px; /* Add spacing from the header */
+}
+
+header {
+    text-align: center;
+    margin-bottom: 180px;
+}
+
 .spinner-border {
     width: 3rem;
     height: 3rem;
@@ -238,12 +255,14 @@ label {
     border-right-color: transparent;
     border-radius: 50%;
     animation: spinner-border 0.75s linear infinite;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    margin-top: -1.5rem; /* Half of the spinner's height */
-    margin-left: -1.5rem; /* Half of the spinner's width */
-    z-index: 1000;
+    margin-bottom: 10px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.loading-text {
+    color: #333;
+    font-weight: bold;
 }
 
 @keyframes spinner-border {
