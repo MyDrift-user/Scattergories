@@ -30,7 +30,7 @@
         </div>
     </div>
 
-    <!-- playertag Entry for both creator and direct link joins -->
+    <!-- Player Tag Entry -->
     <div id="enterplayertag" class="container" style="display:none;">
         <div class="card">
             <h2>Enter Your Player Tag</h2>
@@ -39,7 +39,7 @@
         </div>
     </div>
 
-    <!-- Lobby Section (Hidden Initially) -->
+    <!-- Lobby Section -->
     <div id="lobby" class="container" style="display:none;">
         <div class="card">
             <h2>Lobby ID:</h2>
@@ -47,11 +47,43 @@
             <button id="copyLobbyIdBtn" class="btn secondary">Copy ID</button>
             <button id="copyLobbyLinkBtn" class="btn secondary">Copy Link</button>
             <h3>Players:</h3>
-            <ul id="playerList" class="player-list"></ul> <!-- Display the list of players -->
+            <ul id="playerList" class="player-list"></ul>
             <div class="btn-group">
                 <button id="startGameBtn" class="btn" style="display:none;">Start Game</button>
                 <button id="leaveLobbyBtn" class="btn secondary">Leave Lobby</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Enter Category Section -->
+    <div id="enterCategory" class="container" style="display:none;">
+        <div class="card">
+            <h2>Enter a Category</h2>
+            <input type="text" id="categoryInput" placeholder="Enter a Category">
+            <button id="submitCategoryBtn" class="btn">Submit Category</button>
+        </div>
+    </div>
+
+    <!-- Answer Phase Section -->
+    <div id="answerPhase" class="container" style="display:none;">
+        <div class="card">
+            <h2>Answer the Categories</h2>
+            <p>Letter: <span id="randomLetterDisplay"></span></p>
+            <form id="answersForm">
+                <!-- Input fields will be generated dynamically -->
+            </form>
+            <button id="submitAnswersBtn" class="btn">Submit Answers</button>
+        </div>
+    </div>
+
+    <!-- Results Phase Section -->
+    <div id="resultsPhase" class="container" style="display:none;">
+        <div class="card">
+            <h2>Results</h2>
+            <table id="resultsTable">
+                <!-- Results will be displayed here -->
+            </table>
+            <button id="backToLobbyBtn" class="btn">Back to Lobby</button>
         </div>
     </div>
 

@@ -1,3 +1,4 @@
+// public/script.js
 const socket = io();
 
 let currentLobbyId = '';
@@ -62,6 +63,9 @@ function switchToMainMenu() {
     document.getElementById('mainMenu').style.display = 'block';
     document.getElementById('lobby').style.display = 'none';
     document.getElementById('enterplayertag').style.display = 'none';
+    document.getElementById('enterCategory').style.display = 'none';
+    document.getElementById('answerPhase').style.display = 'none';
+    document.getElementById('resultsPhase').style.display = 'none';
     history.pushState(null, '', `/`);
 }
 
@@ -75,7 +79,7 @@ document.getElementById('createLobbyBtn').addEventListener('click', () => {
 });
 
 document.getElementById('joinLobbyBtn').addEventListener('click', () => {
-    const lobbyId = getTextFromEditableDiv('lobbyIdField');
+    const lobbyId = document.getElementById('lobbyIdField').value.trim();
     if (lobbyId) {
         currentLobbyId = lobbyId;
         console.log(`Trying to join lobby with ID: ${lobbyId}`);
@@ -144,7 +148,7 @@ socket.on('updateLobby', (players) => {
         } else {
             li.textContent = player.playertag;
         }
-        
+
         if (player.isHost) {
             li.classList.add('host');
             if (player.sessionId === sessionId) {
@@ -175,12 +179,14 @@ document.getElementById('leaveLobbyBtn').addEventListener('click', () => {
 });
 
 document.getElementById('submitplayertagBtn').addEventListener('click', () => {
-    const playertag = document.getElementById('playertagInput').value;
+    const playertag = document.getElementById('playertagInput').value.trim();
     if (playertag) {
         const sessionId = saveSession(playertag);
         console.log(`Joining lobby ${currentLobbyId} with playertag: ${playertag}, session: ${sessionId}`);
         socket.emit('joinLobby', { lobbyId: currentLobbyId, playertag, sessionId });
         switchToLobby(currentLobbyId);
+    } else {
+        alert("Please enter a valid player tag!");
     }
 });
 
@@ -200,3 +206,158 @@ window.onload = function() {
         }
     }
 };
+
+// Game Logic
+
+document.getElementById('startGameBtn').addEventListener('click', () => {
+    socket.emit('startGame', { lobbyId: currentLobbyId });
+});
+
+socket.on('enterCategories', () => {
+    // Hide other sections and show the category input
+    document.getElementById('lobby').style.display = 'none';
+    document.getElementById('enterCategory').style.display = 'block';
+});
+
+document.getElementById('submitCategoryBtn').addEventListener('click', () => {
+    const category = document.getElementById('categoryInput').value.trim();
+    if (category) {
+        socket.emit('submitCategory', {
+            lobbyId: currentLobbyId,
+            sessionId: getSessionId(),
+            category
+        });
+        document.getElementById('enterCategory').style.display = 'none';
+        // Optionally, show a waiting message
+    } else {
+        alert('Please enter a category.');
+    }
+});
+
+// Handle the start of the answer phase
+socket.on('startAnswerPhase', ({ categories, letter }) => {
+    // Hide other sections and show the answers input
+    document.getElementById('enterCategory').style.display = 'none';
+    document.getElementById('answerPhase').style.display = 'block';
+    document.getElementById('randomLetterDisplay').textContent = letter;
+
+    const answersForm = document.getElementById('answersForm');
+    answersForm.innerHTML = '';
+    categories.forEach((category, index) => {
+        const div = document.createElement('div');
+        div.innerHTML = `
+            <label>${category}</label>
+            <input type="text" name="answer${index}" required data-letter="${letter.toLowerCase()}">
+            <span class="validation-message"></span>
+        `;
+        answersForm.appendChild(div);
+    });
+
+    // Add input event listeners for client-side validation
+    const inputs = answersForm.querySelectorAll('input[type="text"]');
+    inputs.forEach(input => {
+        input.addEventListener('input', () => {
+            const requiredLetter = input.dataset.letter;
+            const value = input.value.trim().toLowerCase();
+            const validationMessage = input.nextElementSibling;
+
+            if (value && !value.startsWith(requiredLetter)) {
+                validationMessage.textContent = `Answer must start with "${requiredLetter.toUpperCase()}"`;
+            } else {
+                validationMessage.textContent = '';
+            }
+        });
+    });
+});
+
+// When submitting answers
+document.getElementById('submitAnswersBtn').addEventListener('click', () => {
+    const formData = new FormData(document.getElementById('answersForm'));
+    const answers = {};
+    let allValid = true;
+
+    formData.forEach((value, key) => {
+        const input = document.querySelector(`input[name="${key}"]`);
+        const requiredLetter = input.dataset.letter;
+        const valueTrimmed = value.trim();
+        if (valueTrimmed && !valueTrimmed.toLowerCase().startsWith(requiredLetter)) {
+            allValid = false;
+            input.nextElementSibling.textContent = `Answer must start with "${requiredLetter.toUpperCase()}"`;
+        } else {
+            input.nextElementSibling.textContent = '';
+        }
+        answers[key] = valueTrimmed;
+    });
+
+    if (allValid) {
+        socket.emit('submitAnswers', {
+            lobbyId: currentLobbyId,
+            sessionId: getSessionId(),
+            answers
+        });
+        document.getElementById('answerPhase').style.display = 'none';
+        // Optionally, show a waiting message
+    }
+});
+
+// When showing results
+socket.on('showResults', ({ answers, categories, players, scores, letter }) => {
+    // Hide other sections and show the results
+    document.getElementById('answerPhase').style.display = 'none';
+    document.getElementById('resultsPhase').style.display = 'block';
+
+    const resultsTable = document.getElementById('resultsTable');
+    resultsTable.innerHTML = '';
+
+    // Generate table headers
+    const headerRow = document.createElement('tr');
+    headerRow.innerHTML = '<th>Player</th>';
+    categories.forEach(c => {
+        const th = document.createElement('th');
+        th.textContent = c.category;
+        headerRow.appendChild(th);
+    });
+    // Add a column for scores
+    headerRow.innerHTML += '<th>Score</th>';
+    resultsTable.appendChild(headerRow);
+
+    // Generate rows for each player
+    players.forEach(player => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${player.playertag}</td>`;
+        categories.forEach((_, index) => {
+            const td = document.createElement('td');
+            let answerText = answers[player.sessionId][`answer${index}`];
+            if (!answerText) {
+                answerText = '---';
+            }
+
+            // Highlight invalid answers
+            if (answerText.startsWith('Invalid')) {
+                td.classList.add('invalid-answer');
+            }
+
+            td.textContent = answerText;
+            row.appendChild(td);
+        });
+        // Display the player's score
+        const scoreTd = document.createElement('td');
+        scoreTd.textContent = scores[player.sessionId] || 0;
+        row.appendChild(scoreTd);
+
+        resultsTable.appendChild(row);
+    });
+});
+
+document.getElementById('backToLobbyBtn').addEventListener('click', () => {
+    // Reset game state and go back to lobby
+    document.getElementById('resultsPhase').style.display = 'none';
+    document.getElementById('lobby').style.display = 'block';
+    socket.emit('backToLobby', { lobbyId: currentLobbyId });
+});
+
+socket.on('backToLobby', () => {
+    // Reset any game-specific UI elements if necessary
+    document.getElementById('resultsPhase').style.display = 'none';
+    document.getElementById('lobby').style.display = 'block';
+});

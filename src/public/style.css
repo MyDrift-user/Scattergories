@@ -1,3 +1,4 @@
+/* public/style.css */
 body {
     font-family: 'Poppins', sans-serif;
     background-color: #f4f7fc;
@@ -29,7 +30,7 @@ h1 {
 
 .container {
     width: 100%;
-    max-width: 400px;
+    max-width: 500px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -100,6 +101,7 @@ input[type="text"]:focus {
     display: flex;
     gap: 10px;
     justify-content: center;
+    margin-top: 10px;
 }
 
 .player-list {
@@ -178,5 +180,53 @@ input[type="text"]:focus {
 
 .host {
     color: gold !important;
+    font-weight: bold;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-top: 10px;
+    text-align: left;
+}
+
+#answersForm input[type="text"] {
+    width: 100%;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+#resultsTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+#resultsTable th, #resultsTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+#resultsTable th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+#resultsTable tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.validation-message {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 2px;
+    display: block;
+    text-align: left;
+}
+
+/* Styling for invalid answers in the results table */
+.invalid-answer {
+    color: red;
     font-weight: bold;
 }
