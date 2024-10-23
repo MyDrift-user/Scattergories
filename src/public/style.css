@@ -138,3 +138,26 @@ input[type="text"]:focus {
     color: gold !important;  /* Ensure the color applies */
     font-weight: bold;
 }
+
+/* Additional styles for the name input and edit button */
+.player-list input[type="text"] {
+    padding: 5px;
+    margin-right: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.player-list button {
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.player-list button:hover {
+    background-color: #0056b3;
+}

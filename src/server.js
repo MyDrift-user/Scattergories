@@ -53,6 +53,23 @@ io.on('connection', (socket) => {
         }
     });
 
+    // Handle renaming a player
+    socket.on('renamePlayer', ({ sessionId, newPlayertag }) => {
+        const lobbyId = userSessions[sessionId].lobbyId;
+        
+        // Find the player in the lobby and update their playertag
+        const player = lobbies[lobbyId].find(player => player.sessionId === sessionId);
+        if (player) {
+            player.playertag = newPlayertag;
+            console.log(`${sessionId} renamed to ${newPlayertag}`);
+
+            // Notify all players in the lobby about the updated player list
+            io.to(lobbyId).emit('updateLobby', lobbies[lobbyId]);
+        } else {
+            console.log(`Player with session ID ${sessionId} not found`);
+        }
+    });
+
     // Handle leaving a lobby
     socket.on('leaveLobby', ({ lobbyId, sessionId }) => {
         if (lobbies[lobbyId]) {

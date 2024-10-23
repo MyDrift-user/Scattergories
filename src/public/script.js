@@ -136,21 +136,58 @@ socket.on('rejoinLobby', (lobbyId) => {
 // Update player list when receiving the 'updateLobby' event
 socket.on('updateLobby', (players) => {
     const playerList = document.getElementById('playerList');
-    playerList.innerHTML = '';  // Clear the player list
+    playerList.innerHTML = '';  // Clear the current list
+
+    const sessionId = getSessionId();  // Get the current user's session ID
 
     players.forEach(player => {
         const li = document.createElement('li');
-        li.textContent = player.playertag;  // Just the player's name, no extra text
+        
+        // If this is the current user, add an edit button
+        if (player.sessionId === sessionId) {
+            // Create an input field for editing the name
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.value = player.playertag;
+            nameInput.disabled = true;  // Initially disabled, will be enabled for editing
 
-        // Apply the host class to the host's username
+            // Create an edit button
+            const editButton = document.createElement('button');
+            editButton.textContent = 'Edit';
+
+            // Toggle between edit and confirm mode
+            let isEditing = false;
+            editButton.addEventListener('click', () => {
+                if (isEditing) {
+                    // If already editing, send the new name to the server
+                    const newPlayertag = nameInput.value;
+                    socket.emit('renamePlayer', { sessionId, newPlayertag });
+                    nameInput.disabled = true;  // Disable the input again
+                    editButton.textContent = 'Edit';  // Change button back to 'Edit'
+                    isEditing = false;
+                } else {
+                    // Enable the input field for editing
+                    nameInput.disabled = false;
+                    nameInput.focus();  // Focus the input for convenience
+                    editButton.textContent = 'Confirm';  // Change button to 'Confirm'
+                    isEditing = true;
+                }
+            });
+
+            li.appendChild(nameInput);
+            li.appendChild(editButton);
+        } else {
+            // Just display the player's name for others
+            li.textContent = player.playertag;
+        }
+
+        // Highlight the host in golden color
         if (player.isHost) {
             li.classList.add('host');
         }
 
-        playerList.appendChild(li);  // Add player to the list
+        playerList.appendChild(li);
     });
-
-    console.log('Updated player list:', players);
 });
 
 // Handle error messages
