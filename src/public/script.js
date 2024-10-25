@@ -186,7 +186,7 @@ document.getElementById('submitplayertagBtn').addEventListener('click', () => {
         socket.emit('joinLobby', { lobbyId: currentLobbyId, playertag, sessionId });
         switchToLobby(currentLobbyId);
     } else {
-        alert("Please enter a valid player tag!");
+        console.log("Please enter a valid player tag!");
     }
 });
 
@@ -236,7 +236,6 @@ document.getElementById('submitCategoryBtn').addEventListener('click', () => {
         });
         document.getElementById('enterCategory').style.display = 'none';
         document.getElementById('loadingIndicator').style.display = 'block';
-        // Optionally, show a waiting message
     } else {
         alert('Please enter a category.');
     }
